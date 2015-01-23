@@ -1,0 +1,90 @@
+---
+title: "Writeup summary"
+output: html_document
+---
+
+##Libraries
+
+Load all needed libraries:
+
+```{r, echo=FALSE}
+library(caret)
+library(randomForest)
+library(corrplot)
+library(kernlab)
+```
+
+##Reading the data:
+
+```{r}
+options(warn=1)
+setInternet2(use = TRUE)
+
+file1 <- "./data/pml-training.csv"
+file2 <- "./data/pml-testing.csv"
+
+# read the training file
+data_training <- read.csv("./data/pml-training.csv", na.strings= c("NA",""," "))
+```
+## Data cleanup
+```{r}
+# making the data usable the data by removing columns which contain "NA"
+data_training_NAs <- apply(data_training, 2, function(x) sum(is.na(x)))
+data_training_usable <- data_training[,which(data_training_NAs == 0)]
+
+# remove not needed columns which are not variables
+data_training_usable <- data_training_usable[8:length(data_training_usable)]
+```
+## Subsetting to Training\Validation sets
+
+```{r}
+# split the data to trainings and validation sets 75/25
+inTrain <- createDataPartition(y = data_training_usable$classe, p = 0.75, list = FALSE)
+training <- data_training_usable[inTrain, ]
+validation <- data_training_usable[-inTrain, ]
+```
+
+## Correlation matrix plot
+```{r}
+# Plotting a correlation matrix to see relationships among predictor variables. This information could be useful for preprocessing with PCA
+correlMatrix <- cor(training[, -length(training)])
+corrplot(correlMatrix, order = "FPC", method = "color", type = "lower", tl.cex = 0.7,  tl.col = rgb(0, 0, 0))
+```
+
+##Modelling using three machine learning methods
+```{r}
+# fit a model to predict the classe using every other variable as a predictor
+#Random forest method
+model.rm     <- randomForest(classe ~ ., data = training)
+#Linear discriminant analysis method
+#model.lda    <- train(classe ~ ., data = training, method="lda")
+#Recursive Partitioning and Regression Trees method
+#model.rpart  <- train(classe ~ ., data = training, method="rpart")
+```
+###Results of training set
+```{r, echo=F}
+# The random forest model provided the best in the training fit. Its confusion matrix is reported below.
+model.rm
+# The confusion matrix reveals that out of bag error is around ~0.5%. This means we can expext ~99.5% accuracy in the testing set which we will test using the testing set we set aside in the beginning.
+```
+###Results of testing set
+```{r}
+predictvalidation.rm    <- predict(model.rm, newdata = validation)
+confusionMatrix(validation$classe, predictvalidation.rm)
+#The accuracy of the testing set is close to 100% so no bootsing or preprocessing will be used to upgrade the model
+```
+#Data for submission
+```{r}
+# use the best model (random forest) to forecast for the test set
+data_test <- read.csv("./data/pml-testing.csv", na.strings= c("NA",""," "))
+data_test_NAs <- apply(data_test, 2, function(x) sum(is.na(x)))
+data_test_usable <- data_test[,which(data_test_NAs == 0)]
+data_test_usable <- data_test_usable[8:length(data_test_usable)]
+
+# predict the classes of the test set
+predictTest <- predict(model.rm, data_test_usable)
+
+print(predictTest)
+
+#The 20 classe's were forecasted with 100% accuracy
+```
