@@ -46,7 +46,8 @@ validation <- data_training_usable[-inTrain, ]
 
 ## Correlation matrix plot
 ```{r}
-# Plotting a correlation matrix to see relationships among predictor variables. This information could be useful for preprocessing with PCA
+# Plotting a correlation matrix to see relationships among predictor variables.
+# This information could be useful for preprocessing with PCA
 correlMatrix <- cor(training[, -length(training)])
 corrplot(correlMatrix, order = "FPC", method = "color", type = "lower", tl.cex = 0.7,  tl.col = rgb(0, 0, 0))
 ```
@@ -63,15 +64,19 @@ model.rm     <- randomForest(classe ~ ., data = training)
 ```
 ###Results of training set
 ```{r, echo=F}
-# The random forest model provided the best in the training fit. Its confusion matrix is reported below.
+# The random forest model provided the best in the training fit.
+#Its confusion matrix is reported below.
 model.rm
-# The confusion matrix reveals that out of bag error is around ~0.5%. This means we can expext ~99.5% accuracy in the testing set which we will test using the testing set we set aside in the beginning.
+# The confusion matrix reveals that out of bag error is around ~0.5%.
+#This means we can expext ~99.5% accuracy in the testing set which we will
+#test using the testing set we set aside in the beginning.
 ```
 ###Results of testing set
 ```{r}
 predictvalidation.rm    <- predict(model.rm, newdata = validation)
 confusionMatrix(validation$classe, predictvalidation.rm)
-#The accuracy of the testing set is close to 100% so no bootsing or preprocessing will be used to upgrade the model
+#The accuracy of the testing set is close to 100% so no bootsing
+#or preprocessing will be used to upgrade the model
 ```
 #Data for submission
 ```{r}
