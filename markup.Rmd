@@ -7,14 +7,14 @@ output: html_document
 
 Load all needed libraries:
 
-```{r, echo=FALSE}
+```{r}
 library(caret)
 library(randomForest)
 library(corrplot)
 library(kernlab)
 ```
 
-##Reading the data:
+##Read the data:
 
 ```{r}
 options(warn=1)
@@ -35,7 +35,7 @@ data_training_usable <- data_training[,which(data_training_NAs == 0)]
 # remove not needed columns which are not variables
 data_training_usable <- data_training_usable[8:length(data_training_usable)]
 ```
-## Subsetting to Training\Validation sets
+## Subsetting to Training and Validation sets
 
 ```{r}
 # split the data to trainings and validation sets 75/25
